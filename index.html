@@ -167,7 +167,7 @@
   .section h2 { margin: 0 0 16px; font-size: 1.1rem; color: var(--orange); font-weight: 800; display: flex; align-items: center; gap: 10px; padding-bottom: 12px; border-bottom: 1px solid var(--line); }
 
   .text-list { list-style: none; padding: 0; margin: 0; }
-  .text-list li { padding: 14px 18px; background: var(--card-2); border-right: 3px solid var(--orange); border-radius: 6px; margin-bottom: 10px; color: var(--ink); white-space: pre-wrap; word-wrap: break-word; text-align: justify; text-justify: inter-word; line-height: 1.9; }
+  .text-list li { padding: 14px 18px; background: var(--card-2); border-right: 3px solid var(--orange); border-radius: 6px; margin-bottom: 10px; color: var(--ink); white-space: pre-wrap; word-wrap: break-word; text-align: justify; text-justify: inter-word; line-height: 1.9; font-weight: 700; font-size: 1.02rem; }
 
   .link-grid { display: grid; grid-template-columns: 1fr; gap: 12px; }
   @media (min-width: 700px) { .link-grid.two-col { grid-template-columns: 1fr 1fr; } }
@@ -186,6 +186,8 @@
   .platform-link { display: inline-flex; align-items: center; gap: 6px; background: var(--orange); color: #fff; padding: 6px 12px; border-radius: 7px; text-decoration: none; font-weight: 600; font-size: 0.82rem; line-height: 1.2; align-self: flex-start; transition: all 0.2s; border: 1px solid var(--orange-darker); }
   .platform-link svg { width: 12px; height: 12px; flex-shrink: 0; }
   .platform-link:hover { background: var(--orange-bright); box-shadow: 0 3px 10px rgba(194,65,12,0.30); transform: translateY(-1px); }
+  .platform-card.platform-warn { border-right: 4px solid var(--danger); }
+  .platform-card.platform-warn .platform-link:hover { background: #DC2626 !important; box-shadow: 0 3px 10px rgba(185,28,28,0.30); }
 
   .section-note { background: var(--amber-soft); border: 1px solid rgba(217,119,6,0.30); border-right: 3px solid var(--amber); border-radius: 8px; padding: 10px 14px; color: var(--ink-soft); font-size: 0.92rem; margin: 0 0 16px; }
   .report-footer { text-align: center; padding: 26px 16px; margin-top: 26px; background: var(--card); border: 1px solid var(--line); border-top: 3px solid var(--orange); border-radius: 14px; color: var(--orange); font-weight: 800; font-size: 1.08rem; letter-spacing: 0.5px; }
@@ -531,7 +533,7 @@
   </div>
 </main>
 
-<footer class="app-footer">وحدة الرصد والتحليل</footer>
+<footer class="app-footer"></footer>
 
 <script>
 (function() {
@@ -617,7 +619,7 @@
     document.querySelectorAll('link[rel="stylesheet"]').forEach(function(l) { styleSheets += l.outerHTML; });
 
     var printStyles = '<style>'
-      + 'body { background: #fff !important; padding: 20px !important; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; color-adjust: exact !important; }'
+      + 'body { background: #fff !important; padding: 20px !important; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; color-adjust: exact !important; display: block !important; height: auto !important; overflow: visible !important; }'
       + '.section { opacity: 1 !important; transform: none !important; }'
       + '.report-header { background: linear-gradient(180deg, rgba(194,65,12,0.10) 0%, rgba(194,65,12,0.02) 100%) !important; border-top: 3px solid #C2410C !important; }'
       + '.report-title { color: #C2410C !important; }'
@@ -631,6 +633,7 @@
       + '.platform-card { border-right: 4px solid #C2410C !important; }'
       + '.platform-card.platform-x .platform-badge { background: #000 !important; color: #fff !important; }'
       + '.platform-card.platform-fb .platform-badge { background: #1877f2 !important; color: #fff !important; }'
+      + '.platform-card.platform-warn { border-right: 4px solid #B91C1C !important; }'
       + '.platform-link { background: #C2410C !important; color: #fff !important; }'
       + 'a[href] { color: #C2410C; }'
       + '.counter-campaign-section { border-right: 3px solid #C2410C !important; background: #FBF7EE !important; }'
@@ -902,9 +905,12 @@
     if (!items.length) return sectionEmpty('⚠️', 'ico-warn', 'منشورات تحريضية');
     var cards = items.map(function(it) {
       var t = it.title || 'بدون عنوان', u = it.url || '', isHttp = /^https?:\/\//i.test(u);
-      return '<a class="link-card" href="' + escapeHtml(isHttp ? u : '#') + '"' + (isHttp ? ' target="_blank" rel="noopener noreferrer"' : '') + '><div class="lc-title">' + escapeHtml(t) + '</div>' + (isHttp ? '<span class="lc-url">' + escapeHtml(shortenUrl(u)) + '</span>' : '') + '</a>';
+      var platformIcon = '⚠️';
+      var platformLabel = 'منشور تحريضي';
+      var actionLabel = 'اضغط لعرض المنشور';
+      return '<div class="platform-card platform-warn"><div class="platform-badge" style="background:var(--danger);">' + platformIcon + '<span>' + platformLabel + '</span></div><p class="platform-text">' + escapeHtml(t) + '</p>' + (isHttp ? '<a class="platform-link" style="background:var(--danger);border-color:#991B1B;" href="' + escapeHtml(u) + '" target="_blank" rel="noopener noreferrer">⚠️<span>' + actionLabel + '</span></a>' : '') + '</div>';
     }).join('');
-    return '<section class="section"><h2><span class="ico ico-warn">⚠️</span>منشورات تحريضية</h2><div class="link-grid two-col">' + cards + '</div></section>';
+    return '<section class="section"><h2><span class="ico ico-warn">⚠️</span>منشورات تحريضية</h2><div class="platform-list">' + cards + '</div></section>';
   }
   function renderPlatformSection(platform, title, items, noteText) {
     var iconHtml = platform === 'x' ? X_SVG : FB_SVG;
