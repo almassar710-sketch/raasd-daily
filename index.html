@@ -71,6 +71,9 @@
     padding: 14px 16px; position: sticky; top: 0; z-index: 100;
     box-shadow: 0 2px 10px rgba(0,0,0,0.04);
   }
+  @supports (-webkit-touch-callout: none) {
+    .viewer-bar { position: -webkit-sticky; }
+  }
   .viewer-bar-inner {
     max-width: 880px; margin: 0 auto;
     display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
@@ -298,7 +301,6 @@
   <div class="viewer-bar-inner">
     <label>📅 تقرير الرصد:</label>
     <select id="vb-date-select"></select>
-    <button class="vb-btn" id="vb-copy-btn">🔗 نسخ الرابط</button>
   </div>
 </div>
 
@@ -583,22 +585,50 @@
 
   function printReport(contentEl) {
     var reportHtml = contentEl.innerHTML;
-    // Remove the action buttons from the print content
     var tmp = document.createElement('div');
     tmp.innerHTML = reportHtml;
-    var actions = tmp.querySelectorAll('.report-actions');
-    actions.forEach(function(a) { a.remove(); });
-    // Make all sections visible (bypass IntersectionObserver)
+    // Remove action buttons
+    tmp.querySelectorAll('.report-actions').forEach(function(a) { a.remove(); });
+    // Make all sections visible
     tmp.querySelectorAll('.section').forEach(function(s) { s.classList.add('visible'); });
+    // Show full URLs next to links for print
+    tmp.querySelectorAll('a.platform-link').forEach(function(a) {
+      var url = a.getAttribute('href');
+      if (url && /^https?:\/\//i.test(url)) {
+        var urlSpan = document.createElement('div');
+        urlSpan.style.cssText = 'font-size:0.75rem;color:#9A3412;direction:ltr;text-align:right;word-break:break-all;margin-top:4px;';
+        urlSpan.textContent = url;
+        a.parentNode.insertBefore(urlSpan, a.nextSibling);
+      }
+    });
+    // Ensure link-card URLs are visible
+    tmp.querySelectorAll('a.link-card').forEach(function(a) {
+      var url = a.getAttribute('href');
+      if (url && /^https?:\/\//i.test(url) && !a.querySelector('.lc-url')) {
+        var urlSpan = document.createElement('span');
+        urlSpan.className = 'lc-url';
+        urlSpan.textContent = url;
+        a.appendChild(urlSpan);
+      }
+    });
+
+    var printContent = tmp.innerHTML;
+
+    // Create a hidden iframe for printing (works on mobile + preserves links)
+    var iframe = document.createElement('iframe');
+    iframe.style.cssText = 'position:fixed;top:-9999px;left:-9999px;width:800px;height:600px;border:none;';
+    document.body.appendChild(iframe);
 
     var styleSheets = '';
     document.querySelectorAll('style').forEach(function(s) { styleSheets += s.outerHTML; });
     document.querySelectorAll('link[rel="stylesheet"]').forEach(function(l) { styleSheets += l.outerHTML; });
 
-    var html = '<!DOCTYPE html><html lang="ar" dir="rtl"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">'
+    var iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
+    iframeDoc.open();
+    iframeDoc.write('<!DOCTYPE html><html lang="ar" dir="rtl"><head><meta charset="UTF-8">'
       + styleSheets
       + '<style>'
-      + 'body { background: #fff !important; padding: 20px !important; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }'
+      + 'body { background: #fff !important; padding: 20px !important; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; color-adjust: exact !important; }'
       + '.section { opacity: 1 !important; transform: none !important; }'
       + '.report-header { background: linear-gradient(180deg, rgba(194,65,12,0.10) 0%, rgba(194,65,12,0.02) 100%) !important; border-top: 3px solid #C2410C !important; }'
       + '.report-title { color: #C2410C !important; }'
@@ -606,32 +636,36 @@
       + '.report-footer { border-top: 3px solid #C2410C !important; color: #C2410C !important; }'
       + '.section h2 { color: #C2410C !important; }'
       + '.text-list li { border-right: 3px solid #C2410C !important; background: #FBF7EE !important; }'
-      + '.link-card { border-right: 3px solid #C2410C !important; }'
+      + '.link-card { border-right: 3px solid #C2410C !important; color: #C2410C !important; }'
       + '.link-card .lc-title { color: #C2410C !important; }'
+      + '.link-card .lc-url { color: #9A3412 !important; }'
       + '.platform-card { border-right: 4px solid #C2410C !important; }'
       + '.platform-card.platform-x .platform-badge { background: #000 !important; color: #fff !important; }'
       + '.platform-card.platform-fb .platform-badge { background: #1877f2 !important; color: #fff !important; }'
       + '.platform-link { background: #C2410C !important; color: #fff !important; }'
-      + 'a[href] { color: inherit; text-decoration: underline; }'
+      + 'a[href] { color: #C2410C; }'
       + '.counter-campaign-section { border-right: 3px solid #C2410C !important; background: #FBF7EE !important; }'
-      + '@media print { @page { margin: 15mm; } }'
-      + '</style></head><body>' + tmp.innerHTML + '</body></html>';
+      + '@media print { @page { margin: 15mm; } body { background: #fff !important; } }'
+      + '</style></head><body>' + printContent + '</body></html>');
+    iframeDoc.close();
 
-    var printWin = window.open('', '_blank');
-    if (printWin) {
-      printWin.document.write(html);
-      printWin.document.close();
-      // Wait for fonts and images to load
-      printWin.onload = function() {
-        setTimeout(function() { printWin.print(); }, 400);
-      };
-      // Fallback if onload doesn't fire
-      setTimeout(function() { try { printWin.print(); } catch(e) {} }, 1500);
-    } else {
-      // Popup blocked – fallback to window.print
-      toast('📄 يتم فتح نافذة الطباعة...');
-      window.print();
-    }
+    // Wait for content to load then print
+    iframe.onload = function() {
+      setTimeout(function() {
+        try {
+          iframe.contentWindow.focus();
+          iframe.contentWindow.print();
+        } catch(e) {
+          window.print();
+        }
+        setTimeout(function() { document.body.removeChild(iframe); }, 2000);
+      }, 500);
+    };
+    // Fallback
+    setTimeout(function() {
+      try { iframe.contentWindow.print(); } catch(e) {}
+      setTimeout(function() { try { document.body.removeChild(iframe); } catch(e) {} }, 2000);
+    }, 3000);
   }
 
   // ============ LOCAL STORAGE ============
@@ -947,10 +981,6 @@
           voContent.innerHTML = '<div class="no-report"><div class="big">⚠️</div><h2>تعذّر تحميل التقرير</h2></div>';
         });
       }
-    });
-
-    document.getElementById('vb-copy-btn').addEventListener('click', function() {
-      copyText(window.location.href).then(function() { toast('🔗 تم نسخ الرابط'); });
     });
 
     function voInit() {
