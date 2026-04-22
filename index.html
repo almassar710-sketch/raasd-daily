@@ -207,6 +207,39 @@
   .report-actions .ra-copy:hover { background: var(--orange-bright); box-shadow: 0 6px 18px rgba(194,65,12,0.30); }
   .report-actions .ra-pdf { background: var(--card); color: var(--ink); border-color: var(--line-strong); }
   .report-actions .ra-pdf:hover { background: var(--orange-soft); color: var(--orange); border-color: var(--orange); }
+  .report-actions .ra-archive { background: var(--card-2); color: var(--ink); border-color: var(--line-strong); }
+  .report-actions .ra-archive:hover { background: var(--orange-soft); color: var(--orange); border-color: var(--orange); }
+  .report-actions .ra-srch { background: var(--card-2); color: var(--ink); border-color: var(--line-strong); }
+  .report-actions .ra-srch:hover { background: var(--orange-soft); color: var(--orange); border-color: var(--orange); }
+
+  /* ========== VIEWER ARCHIVE PANEL ========== */
+  #va-panel { max-width: 880px; margin: 0 auto; padding: 0 16px 40px; }
+  .va-card { background: var(--card); border: 1px solid var(--line); border-radius: 18px; padding: 22px 20px; margin-top: 22px; }
+  .va-card h3 { margin: 0 0 16px; font-size: 1.1rem; color: var(--orange); display: flex; align-items: center; gap: 8px; }
+  .va-year-tabs, .va-month-row { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 14px; }
+  .va-year-btn, .va-month-btn { padding: 9px 18px; border-radius: 10px; border: 1.5px solid var(--line-strong); background: var(--card-2); color: var(--ink); font-family: inherit; font-size: 0.97rem; font-weight: 700; cursor: pointer; transition: all 0.18s; }
+  .va-year-btn:hover, .va-month-btn:hover, .va-year-btn.active, .va-month-btn.active { background: var(--orange); color: #fff; border-color: var(--orange-darker); }
+  .va-day-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 10px; margin-top: 6px; }
+  .va-day-btn { padding: 11px 14px; border-radius: 10px; border: 1.5px solid var(--line); background: var(--bg); color: var(--ink); font-family: inherit; font-size: 0.93rem; cursor: pointer; text-align: right; transition: all 0.18s; line-height: 1.5; }
+  .va-day-btn:hover { background: var(--orange-soft); border-color: var(--orange); color: var(--orange); }
+  .va-loading { text-align: center; padding: 22px; color: var(--ink-2); font-size: 0.97rem; }
+  .va-err { text-align: center; padding: 16px; color: #c0392b; background: #fff0f0; border-radius: 10px; font-size: 0.93rem; }
+  .va-no-gh { padding: 18px; background: var(--card-2); border-radius: 10px; color: var(--ink-2); font-size: 0.94rem; text-align: center; }
+  .va-back-btn { display: flex; align-items: center; gap: 6px; padding: 9px 16px; border-radius: 10px; border: 1.5px solid var(--line-strong); background: var(--card-2); color: var(--ink); font-family: inherit; font-size: 0.95rem; font-weight: 700; cursor: pointer; margin-bottom: 16px; transition: all 0.18s; width: fit-content; }
+  .va-back-btn:hover { background: var(--orange-soft); color: var(--orange); border-color: var(--orange); }
+  /* Search panel */
+  .va-search-wrap { display: flex; gap: 10px; margin-bottom: 16px; }
+  .va-search-input { flex: 1; padding: 12px 14px; border: 1.5px solid var(--line-strong); border-radius: 10px; background: var(--bg); color: var(--ink); font-family: inherit; font-size: 1rem; direction: rtl; }
+  .va-search-input:focus { outline: none; border-color: var(--orange); box-shadow: 0 0 0 3px rgba(194,65,12,0.15); }
+  .va-search-btn { padding: 12px 20px; border-radius: 10px; background: var(--orange); color: #fff; border: none; font-family: inherit; font-size: 0.97rem; font-weight: 700; cursor: pointer; white-space: nowrap; }
+  .va-search-btn:hover { background: var(--orange-bright); }
+  .va-progress { font-size: 0.88rem; color: var(--ink-2); margin-bottom: 10px; }
+  .va-result-item { background: var(--card-2); border: 1px solid var(--line); border-radius: 12px; padding: 14px 16px; margin-bottom: 10px; cursor: pointer; transition: all 0.18s; }
+  .va-result-item:hover { border-color: var(--orange); background: var(--orange-soft); }
+  .va-result-date { font-weight: 800; color: var(--orange); margin-bottom: 6px; font-size: 0.97rem; }
+  .va-result-snippet { font-size: 0.88rem; color: var(--ink-2); line-height: 1.7; }
+  .va-result-snippet mark { background: #fff3cd; color: #7c4a00; border-radius: 3px; padding: 0 2px; }
+  .va-no-results { text-align: center; padding: 28px; color: var(--ink-2); font-size: 0.97rem; }
 
   /* ========== PRINT STYLES ========== */
   @media print {
@@ -600,6 +633,7 @@
   <div id="vo-content">
     <div class="no-report"><div class="big">⏳</div><h2>جارٍ تحميل التقرير...</h2></div>
   </div>
+  <div id="va-panel" style="display:none"></div>
 </main>
 
 <footer class="app-footer"></footer>
@@ -1082,7 +1116,7 @@
       + renderNarrativeChart(r)
       + renderCounterCampaign(r.counter_campaign || '')
       + '<div class="report-footer">تقرير الرصد اليومي - قسم المعلومات</div>'
-      + '<div class="report-actions"><button type="button" class="ra-copy" data-action="copy-link">🔗 نسخ رابط التقرير</button><button type="button" class="ra-pdf" data-action="copy-text">📋 نسخ نص التقرير</button></div>';
+      + '<div class="report-actions"><button type="button" class="ra-copy" data-action="copy-link">🔗 نسخ رابط التقرير</button><button type="button" class="ra-pdf" data-action="copy-text">📋 نسخ نص التقرير</button><button type="button" class="ra-archive" data-action="open-archive">📚 تصفح أرشيف الرصد</button><button type="button" class="ra-srch" data-action="open-search">🔍 بحث في الأرشيف</button></div>';
   }
   function observeSections() {
     var obs = new IntersectionObserver(function(entries) {
@@ -1132,6 +1166,264 @@
       observeSections();
     }
 
+    // ========== VIEWER ARCHIVE PANEL ==========
+    var vaPanel = document.getElementById('va-panel');
+    var vaIndex = null;
+    var vaCache = {};
+    var vaActiveYear = null;
+    var vaActiveMonth = null;
+    var vaMode = null; // 'browse' | 'search'
+    var AR_MONTHS_VA = ['يناير','فبراير','مارس','أبريل','مايو','يونيو','يوليو','أغسطس','سبتمبر','أكتوبر','نوفمبر','ديسمبر'];
+
+    function vaBaseUrl() {
+      if (!voGhOwner || !voGhRepo) return null;
+      return 'https://raw.githubusercontent.com/' + encodeURIComponent(voGhOwner) + '/' + encodeURIComponent(voGhRepo) + '/main/reports-archive/';
+    }
+
+    function vaOpen(mode) {
+      vaMode = mode;
+      vaPanel.style.display = '';
+      vaPanel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      var base = vaBaseUrl();
+      if (!base) {
+        vaPanel.innerHTML = '<div class="va-card"><div class="va-no-gh">⚙️ الأرشيف غير متاح — رابط التقرير لا يتضمن معلومات المستودع</div></div>';
+        return;
+      }
+      if (vaIndex) { mode === 'browse' ? vaRenderBrowse() : vaRenderSearch(); return; }
+      vaPanel.innerHTML = '<div class="va-card"><div class="va-loading">⏳ جارٍ تحميل فهرس الأرشيف...</div></div>';
+      fetch(base + 'index.json').then(function(r) { if (!r.ok) throw new Error(r.status); return r.json(); })
+        .then(function(data) {
+          vaIndex = data;
+          mode === 'browse' ? vaRenderBrowse() : vaRenderSearch();
+        }).catch(function(e) {
+          vaPanel.innerHTML = '<div class="va-card"><div class="va-err">⚠️ تعذّر تحميل فهرس الأرشيف — ' + escapeHtml(e.message) + '</div></div>';
+        });
+    }
+
+    function vaClose() {
+      vaPanel.style.display = 'none';
+      vaPanel.innerHTML = '';
+      vaMode = null;
+    }
+
+    // ---- BROWSE MODE ----
+    function vaRenderBrowse() {
+      var years = ['2026','2025','2024'];
+      if (!vaActiveYear) vaActiveYear = years[0];
+      var html = '<div class="va-card">';
+      html += '<button type="button" class="va-back-btn" id="va-close-btn">✕ إغلاق</button>';
+      html += '<h3>📚 تصفح أرشيف الرصد</h3>';
+      html += '<div class="va-year-tabs">' + years.map(function(y) {
+        return '<button class="va-year-btn' + (y === vaActiveYear ? ' active' : '') + '" data-va-year="' + y + '">' + y + '</button>';
+      }).join('') + '</div>';
+      html += '<div id="va-month-area"></div>';
+      html += '</div>';
+      vaPanel.innerHTML = html;
+      document.getElementById('va-close-btn').addEventListener('click', vaClose);
+      vaPanel.querySelectorAll('.va-year-btn').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+          vaActiveYear = btn.dataset.vaYear;
+          vaActiveMonth = null;
+          vaPanel.querySelectorAll('.va-year-btn').forEach(function(b) { b.classList.remove('active'); });
+          btn.classList.add('active');
+          vaRenderMonthRow();
+        });
+      });
+      vaRenderMonthRow();
+    }
+
+    function vaRenderMonthRow() {
+      var monthArea = document.getElementById('va-month-area');
+      if (!monthArea) return;
+      // Collect months available for this year from index
+      var entries = vaIndex.filter(function(e) { return String(e.year || (e.date || '').slice(0,4)) === vaActiveYear; });
+      var monthNums = {};
+      entries.forEach(function(e) {
+        var m = (e.date || '').slice(5,7);
+        if (m && m !== '00') monthNums[m] = true;
+      });
+      var months = Object.keys(monthNums).sort();
+      if (!months.length) {
+        monthArea.innerHTML = '<div class="va-no-gh">لا توجد تقارير لهذا العام في الفهرس</div>';
+        return;
+      }
+      if (!vaActiveMonth || months.indexOf(vaActiveMonth) === -1) vaActiveMonth = months[months.length - 1];
+      var html = '<div class="va-month-row">' + months.map(function(m) {
+        return '<button class="va-month-btn' + (m === vaActiveMonth ? ' active' : '') + '" data-va-month="' + m + '">' + AR_MONTHS_VA[parseInt(m,10)-1] + '</button>';
+      }).join('') + '</div><div id="va-day-area"><div class="va-loading">⏳</div></div>';
+      monthArea.innerHTML = html;
+      monthArea.querySelectorAll('.va-month-btn').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+          vaActiveMonth = btn.dataset.vaMonth;
+          monthArea.querySelectorAll('.va-month-btn').forEach(function(b) { b.classList.remove('active'); });
+          btn.classList.add('active');
+          vaLoadDays(vaActiveYear, vaActiveMonth);
+        });
+      });
+      vaLoadDays(vaActiveYear, vaActiveMonth);
+    }
+
+    function vaLoadDays(year, month) {
+      var dayArea = document.getElementById('va-day-area');
+      if (!dayArea) return;
+      var fileKey = year === '2024' ? '2024' : (year + '-' + month);
+      if (vaCache[fileKey]) { vaRenderDays(vaCache[fileKey], dayArea); return; }
+      dayArea.innerHTML = '<div class="va-loading">⏳ جارٍ التحميل...</div>';
+      var base = vaBaseUrl();
+      fetch(base + fileKey + '.json').then(function(r) { if (!r.ok) throw new Error(r.status); return r.json(); })
+        .then(function(data) {
+          vaCache[fileKey] = data;
+          vaRenderDays(data, dayArea);
+        }).catch(function(e) {
+          dayArea.innerHTML = '<div class="va-err">⚠️ تعذّر تحميل بيانات ' + fileKey + '</div>';
+        });
+    }
+
+    function vaRenderDays(reports, container) {
+      // Filter by active year+month if 2024 (single file)
+      var filtered = reports;
+      if (vaActiveYear === '2024') {
+        filtered = reports.filter(function(r) {
+          return (r.date || '').slice(0,4) === '2024' && (r.date || '').slice(5,7) === vaActiveMonth;
+        });
+      }
+      filtered = filtered.slice().sort(function(a,b) { return (a.date||'') < (b.date||'') ? -1 : 1; });
+      if (!filtered.length) { container.innerHTML = '<div class="va-no-gh">لا توجد تقارير في هذا الشهر</div>'; return; }
+      var html = '<div class="va-day-list">' + filtered.map(function(r) {
+        return '<button class="va-day-btn" data-va-date="' + escapeHtml(r.date||r.id) + '">📄 ' + escapeHtml(r.date_text || arDate(r.date||r.id)) + '</button>';
+      }).join('') + '</div>';
+      container.innerHTML = html;
+      container.querySelectorAll('.va-day-btn').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+          vaLoadAndShowReport(btn.dataset.vaDate);
+        });
+      });
+    }
+
+    function vaLoadAndShowReport(date) {
+      var fileKey = date.slice(0,4) === '2024' ? '2024' : (date.slice(0,4) + '-' + date.slice(5,7));
+      var source = vaCache[fileKey];
+      if (source) {
+        var r = source.filter(function(x) { return (x.date||x.id) === date; })[0];
+        if (r) { vaShowArchiveReport(r); return; }
+      }
+      // Load the file if not cached
+      var base = vaBaseUrl();
+      fetch(base + fileKey + '.json').then(function(resp) { if (!resp.ok) throw new Error(resp.status); return resp.json(); })
+        .then(function(data) {
+          vaCache[fileKey] = data;
+          var r = data.filter(function(x) { return (x.date||x.id) === date; })[0];
+          if (r) vaShowArchiveReport(r);
+        }).catch(function() {
+          toast('⚠️ تعذّر تحميل التقرير');
+        });
+    }
+
+    function vaShowArchiveReport(r) {
+      // Build a minimal report from sections data
+      var html = '<div class="report-header"><h1 class="report-title">تقرير الرصد اليومي</h1><div class="report-date">' + escapeHtml(r.date_text || arDate(r.date)) + '</div></div>';
+      (r.sections || []).forEach(function(s) {
+        if (!s.content && !s.heading) return;
+        html += '<section class="section">';
+        if (s.heading) html += '<h2><span class="ico ico-orange">📌</span>' + escapeHtml(s.heading) + '</h2>';
+        html += '<div style="padding:12px 16px;background:var(--card-2);border-radius:8px;color:var(--ink);white-space:pre-line;line-height:1.9;font-size:0.94rem;text-align:justify">' + escapeHtml(s.content || '') + '</div>';
+        html += '</section>';
+      });
+      if ((r.links||[]).length) {
+        html += '<section class="section"><h2><span class="ico ico-orange">🔗</span>الروابط</h2><div style="display:flex;flex-direction:column;gap:6px;padding:8px 0">';
+        r.links.forEach(function(l) {
+          html += '<a href="' + escapeHtml(l) + '" target="_blank" rel="noopener noreferrer" style="color:var(--orange);font-size:0.85rem;word-break:break-all">' + escapeHtml(l) + '</a>';
+        });
+        html += '</div></section>';
+      }
+      html += '<div style="margin-top:18px"><button type="button" class="va-back-btn" id="va-back-from-report">← العودة للأرشيف</button></div>';
+      vaPanel.innerHTML = '<div class="va-card">' + html + '</div>';
+      document.getElementById('va-back-from-report').addEventListener('click', function() {
+        vaRenderBrowse();
+      });
+      vaPanel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    // ---- SEARCH MODE ----
+    function vaRenderSearch() {
+      var html = '<div class="va-card">';
+      html += '<button type="button" class="va-back-btn" id="va-close-srch">✕ إغلاق</button>';
+      html += '<h3>🔍 بحث في أرشيف الرصد</h3>';
+      html += '<div class="va-search-wrap"><input type="search" id="va-search-input" class="va-search-input" placeholder="ابحث في 500+ تقرير..." dir="rtl" /><button type="button" class="va-search-btn" id="va-search-go">بحث</button></div>';
+      html += '<div id="va-search-results"></div>';
+      html += '</div>';
+      vaPanel.innerHTML = html;
+      document.getElementById('va-close-srch').addEventListener('click', vaClose);
+      var inp = document.getElementById('va-search-input');
+      document.getElementById('va-search-go').addEventListener('click', function() { vaRunSearch(inp.value.trim()); });
+      inp.addEventListener('keydown', function(e) { if (e.key === 'Enter') vaRunSearch(inp.value.trim()); });
+      inp.focus();
+    }
+
+    function vaRunSearch(query) {
+      if (!query || query.length < 2) { document.getElementById('va-search-results').innerHTML = '<div class="va-no-results">أدخل كلمة بحث (حرفان على الأقل)</div>'; return; }
+      var resultsDiv = document.getElementById('va-search-results');
+      var base = vaBaseUrl();
+      // Collect all file keys from index
+      var fileKeys = {};
+      vaIndex.forEach(function(e) {
+        var y = String(e.year || (e.date||'').slice(0,4));
+        var m = (e.date||'').slice(5,7);
+        var key = y === '2024' ? '2024' : (y + '-' + m);
+        if (key && key !== '2024-00' && m !== '00') fileKeys[key] = true;
+      });
+      // Add 2024 as single key
+      fileKeys['2024'] = true;
+      var keys = Object.keys(fileKeys).filter(function(k) { return k && k.length > 2; });
+      resultsDiv.innerHTML = '<div class="va-progress">⏳ جارٍ البحث في ' + toAr(keys.length) + ' ملف...</div>';
+      var loaded = 0;
+      var allResults = [];
+      var q = query.toLowerCase();
+      function checkDone() {
+        loaded++;
+        if (loaded < keys.length) {
+          resultsDiv.querySelector('.va-progress').textContent = '⏳ جارٍ البحث... ' + toAr(loaded) + '/' + toAr(keys.length);
+          return;
+        }
+        allResults.sort(function(a,b) { return (b.date||'') > (a.date||'') ? 1 : -1; });
+        if (!allResults.length) { resultsDiv.innerHTML = '<div class="va-no-results">🔍 لا توجد نتائج للبحث عن «' + escapeHtml(query) + '»</div>'; return; }
+        var html = '<div style="margin-bottom:10px;font-size:0.9rem;color:var(--ink-2)">تم العثور على ' + toAr(allResults.length) + ' نتيجة</div>';
+        allResults.forEach(function(item) {
+          var snip = item.snippet.replace(new RegExp('(' + query.replace(/[.*+?^${}()|[\]\\]/g,'\\$&') + ')', 'gi'), '<mark>$1</mark>');
+          html += '<div class="va-result-item" data-va-date="' + escapeHtml(item.date) + '">';
+          html += '<div class="va-result-date">📄 ' + escapeHtml(item.date_text || arDate(item.date)) + '</div>';
+          html += '<div class="va-result-snippet">' + snip + '</div>';
+          html += '</div>';
+        });
+        resultsDiv.innerHTML = html;
+        resultsDiv.querySelectorAll('.va-result-item').forEach(function(el) {
+          el.addEventListener('click', function() { vaLoadAndShowReport(el.dataset.vaDate); });
+        });
+      }
+      keys.forEach(function(key) {
+        if (vaCache[key]) {
+          vaCache[key].forEach(function(r) { vaSearchReport(r, q, query, allResults); });
+          checkDone(); return;
+        }
+        fetch(base + key + '.json').then(function(resp) { if (!resp.ok) throw new Error(); return resp.json(); })
+          .then(function(data) {
+            vaCache[key] = data;
+            data.forEach(function(r) { vaSearchReport(r, q, query, allResults); });
+          }).catch(function() {}).then(checkDone);
+      });
+    }
+
+    function vaSearchReport(r, q, rawQ, results) {
+      var fullText = (r.sections || []).map(function(s) { return (s.heading||'') + ' ' + (s.content||''); }).join(' ');
+      var idx = fullText.toLowerCase().indexOf(q);
+      if (idx === -1) return;
+      var start = Math.max(0, idx - 60);
+      var end = Math.min(fullText.length, idx + rawQ.length + 100);
+      var snippet = (start > 0 ? '...' : '') + fullText.slice(start, end) + (end < fullText.length ? '...' : '');
+      results.push({ date: r.date || r.id, date_text: r.date_text, snippet: snippet });
+    }
+
+    // ---- Event handler in voContent ----
     // Report action buttons (viewer-only mode)
     voContent.addEventListener('click', function(e) {
       var btn = e.target.closest('[data-action]');
@@ -1140,6 +1432,10 @@
         copyText(window.location.href).then(function() { toast('🔗 تم نسخ الرابط'); });
       } else if (btn.dataset.action === 'copy-text') {
         copyReportText(voContent);
+      } else if (btn.dataset.action === 'open-archive') {
+        if (vaPanel.style.display !== 'none' && vaMode === 'browse') { vaClose(); } else { vaOpen('browse'); }
+      } else if (btn.dataset.action === 'open-search') {
+        if (vaPanel.style.display !== 'none' && vaMode === 'search') { vaClose(); } else { vaOpen('search'); }
       }
     });
 
