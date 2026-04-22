@@ -1806,14 +1806,8 @@
       return ghPushReport(date).then(function() {
         return ghUpdateIndex().catch(function() {}); // index update is optional
       }).then(function() {
-        var isPages = s.deployment_url && s.deployment_url.toLowerCase().indexOf(s.gh_owner.toLowerCase() + '.github.io') !== -1;
         var sep = baseUrl.indexOf('?') !== -1 ? '&' : '?';
-        var url;
-        if (isPages) {
-          url = baseUrl + sep + 'date=' + date;
-        } else {
-          url = baseUrl + sep + 'date=' + date + '&gh=' + encodeURIComponent(s.gh_owner + '/' + s.gh_repo);
-        }
+        var url = baseUrl + sep + 'date=' + date + '&gh=' + encodeURIComponent(s.gh_owner + '/' + s.gh_repo);
         return { url: url, mode: 'GitHub' };
       });
     }
