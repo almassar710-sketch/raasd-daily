@@ -633,7 +633,6 @@
   <div id="vo-content">
     <div class="no-report"><div class="big">⏳</div><h2>جارٍ تحميل التقرير...</h2></div>
   </div>
-  <div id="va-panel" style="display:none"></div>
 </main>
 
 <footer class="app-footer"></footer>
@@ -1161,18 +1160,20 @@
         voContent.innerHTML = '<div class="no-report"><div class="big">📭</div><h2>لا يوجد تقرير لهذا التاريخ</h2></div>';
         return;
       }
+      vaLastDate = date;
+      vaMode = null;
       document.title = 'تقرير الرصد اليومي - ' + arDate(date);
       voContent.innerHTML = renderFullReport(r, date);
       observeSections();
     }
 
-    // ========== VIEWER ARCHIVE PANEL ==========
-    var vaPanel = document.getElementById('va-panel');
+    // ========== VIEWER ARCHIVE ==========
     var vaIndex = null;
     var vaCache = {};
     var vaActiveYear = null;
     var vaActiveMonth = null;
-    var vaMode = null; // 'browse' | 'search'
+    var vaMode = null; // 'browse' | 'search' | null
+    var vaLastDate = null; // last viewed report date for back button
     var AR_MONTHS_VA = ['يناير','فبراير','مارس','أبريل','مايو','يونيو','يوليو','أغسطس','سبتمبر','أكتوبر','نوفمبر','ديسمبر'];
 
     function vaBaseUrl() {
@@ -1180,30 +1181,41 @@
       return 'https://raw.githubusercontent.com/' + encodeURIComponent(voGhOwner) + '/' + encodeURIComponent(voGhRepo) + '/main/reports-archive/';
     }
 
+    function vaSetContent(html) {
+      voContent.innerHTML = html;
+      var vm = document.getElementById('viewer-main');
+      if (vm) vm.scrollTop = 0;
+    }
+
     function vaOpen(mode) {
       vaMode = mode;
-      vaPanel.style.display = '';
-      vaPanel.scrollIntoView({ behavior: 'smooth', block: 'start' });
       var base = vaBaseUrl();
       if (!base) {
-        vaPanel.innerHTML = '<div class="va-card"><div class="va-no-gh">⚙️ الأرشيف غير متاح — رابط التقرير لا يتضمن معلومات المستودع</div></div>';
+        vaSetContent('<div class="va-card"><div class="va-no-gh">⚙️ الأرشيف غير متاح — رابط التقرير لا يتضمن معلومات المستودع</div></div>');
         return;
       }
       if (vaIndex) { mode === 'browse' ? vaRenderBrowse() : vaRenderSearch(); return; }
-      vaPanel.innerHTML = '<div class="va-card"><div class="va-loading">⏳ جارٍ تحميل فهرس الأرشيف...</div></div>';
+      vaSetContent('<div class="va-card"><div class="va-loading">⏳ جارٍ تحميل فهرس الأرشيف...</div></div>');
       fetch(base + 'index.json').then(function(r) { if (!r.ok) throw new Error(r.status); return r.json(); })
         .then(function(data) {
           vaIndex = data;
           mode === 'browse' ? vaRenderBrowse() : vaRenderSearch();
         }).catch(function(e) {
-          vaPanel.innerHTML = '<div class="va-card"><div class="va-err">⚠️ تعذّر تحميل فهرس الأرشيف — ' + escapeHtml(e.message) + '</div></div>';
+          vaSetContent('<div class="va-card"><div class="va-err">⚠️ تعذّر تحميل فهرس الأرشيف — ' + escapeHtml(e.message) + '</div></div>');
         });
     }
 
-    function vaClose() {
-      vaPanel.style.display = 'none';
-      vaPanel.innerHTML = '';
+    function vaBackToReport() {
       vaMode = null;
+      if (vaLastDate && voReports[vaLastDate]) {
+        voShowReport(vaLastDate);
+      } else {
+        voContent.innerHTML = '<div class="no-report"><div class="big">📭</div><h2>أغلق الأرشيف وأعد فتح التقرير من الرابط</h2></div>';
+      }
+    }
+
+    function vaBackBtn(label) {
+      return '<button type="button" class="va-back-btn" onclick="(function(){document.getElementById(\'va-back-trigger\').click()})()">' + label + '</button>';
     }
 
     // ---- BROWSE MODE ----
@@ -1211,20 +1223,22 @@
       var years = ['2026','2025','2024'];
       if (!vaActiveYear) vaActiveYear = years[0];
       var html = '<div class="va-card">';
-      html += '<button type="button" class="va-back-btn" id="va-close-btn">✕ إغلاق</button>';
-      html += '<h3>📚 تصفح أرشيف الرصد</h3>';
-      html += '<div class="va-year-tabs">' + years.map(function(y) {
+      html += '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:10px">';
+      html += '<h3 style="margin:0">📚 تصفح أرشيف الرصد</h3>';
+      html += '<button type="button" class="va-back-btn" id="va-to-report-browse">← رجوع للتقرير</button>';
+      html += '</div>';
+      html += '<div class="va-year-tabs" id="va-year-tabs">' + years.map(function(y) {
         return '<button class="va-year-btn' + (y === vaActiveYear ? ' active' : '') + '" data-va-year="' + y + '">' + y + '</button>';
       }).join('') + '</div>';
       html += '<div id="va-month-area"></div>';
       html += '</div>';
-      vaPanel.innerHTML = html;
-      document.getElementById('va-close-btn').addEventListener('click', vaClose);
-      vaPanel.querySelectorAll('.va-year-btn').forEach(function(btn) {
+      vaSetContent(html);
+      document.getElementById('va-to-report-browse').addEventListener('click', vaBackToReport);
+      document.getElementById('va-year-tabs').querySelectorAll('.va-year-btn').forEach(function(btn) {
         btn.addEventListener('click', function() {
           vaActiveYear = btn.dataset.vaYear;
           vaActiveMonth = null;
-          vaPanel.querySelectorAll('.va-year-btn').forEach(function(b) { b.classList.remove('active'); });
+          document.getElementById('va-year-tabs').querySelectorAll('.va-year-btn').forEach(function(b) { b.classList.remove('active'); });
           btn.classList.add('active');
           vaRenderMonthRow();
         });
@@ -1235,7 +1249,6 @@
     function vaRenderMonthRow() {
       var monthArea = document.getElementById('va-month-area');
       if (!monthArea) return;
-      // Collect months available for this year from index
       var entries = vaIndex.filter(function(e) { return String(e.year || (e.date || '').slice(0,4)) === vaActiveYear; });
       var monthNums = {};
       entries.forEach(function(e) {
@@ -1243,19 +1256,16 @@
         if (m && m !== '00') monthNums[m] = true;
       });
       var months = Object.keys(monthNums).sort();
-      if (!months.length) {
-        monthArea.innerHTML = '<div class="va-no-gh">لا توجد تقارير لهذا العام في الفهرس</div>';
-        return;
-      }
+      if (!months.length) { monthArea.innerHTML = '<div class="va-no-gh">لا توجد تقارير لهذا العام في الفهرس</div>'; return; }
       if (!vaActiveMonth || months.indexOf(vaActiveMonth) === -1) vaActiveMonth = months[months.length - 1];
-      var html = '<div class="va-month-row">' + months.map(function(m) {
+      var html = '<div class="va-month-row" id="va-month-row">' + months.map(function(m) {
         return '<button class="va-month-btn' + (m === vaActiveMonth ? ' active' : '') + '" data-va-month="' + m + '">' + AR_MONTHS_VA[parseInt(m,10)-1] + '</button>';
       }).join('') + '</div><div id="va-day-area"><div class="va-loading">⏳</div></div>';
       monthArea.innerHTML = html;
-      monthArea.querySelectorAll('.va-month-btn').forEach(function(btn) {
+      document.getElementById('va-month-row').querySelectorAll('.va-month-btn').forEach(function(btn) {
         btn.addEventListener('click', function() {
           vaActiveMonth = btn.dataset.vaMonth;
-          monthArea.querySelectorAll('.va-month-btn').forEach(function(b) { b.classList.remove('active'); });
+          document.getElementById('va-month-row').querySelectorAll('.va-month-btn').forEach(function(b) { b.classList.remove('active'); });
           btn.classList.add('active');
           vaLoadDays(vaActiveYear, vaActiveMonth);
         });
@@ -1269,58 +1279,45 @@
       var fileKey = year === '2024' ? '2024' : (year + '-' + month);
       if (vaCache[fileKey]) { vaRenderDays(vaCache[fileKey], dayArea); return; }
       dayArea.innerHTML = '<div class="va-loading">⏳ جارٍ التحميل...</div>';
-      var base = vaBaseUrl();
-      fetch(base + fileKey + '.json').then(function(r) { if (!r.ok) throw new Error(r.status); return r.json(); })
-        .then(function(data) {
-          vaCache[fileKey] = data;
-          vaRenderDays(data, dayArea);
-        }).catch(function(e) {
-          dayArea.innerHTML = '<div class="va-err">⚠️ تعذّر تحميل بيانات ' + fileKey + '</div>';
-        });
+      fetch(vaBaseUrl() + fileKey + '.json').then(function(r) { if (!r.ok) throw new Error(r.status); return r.json(); })
+        .then(function(data) { vaCache[fileKey] = data; vaRenderDays(data, dayArea); })
+        .catch(function() { dayArea.innerHTML = '<div class="va-err">⚠️ تعذّر تحميل بيانات ' + fileKey + '</div>'; });
     }
 
     function vaRenderDays(reports, container) {
-      // Filter by active year+month if 2024 (single file)
       var filtered = reports;
       if (vaActiveYear === '2024') {
         filtered = reports.filter(function(r) {
-          return (r.date || '').slice(0,4) === '2024' && (r.date || '').slice(5,7) === vaActiveMonth;
+          return (r.date||'').slice(0,4) === '2024' && (r.date||'').slice(5,7) === vaActiveMonth;
         });
       }
       filtered = filtered.slice().sort(function(a,b) { return (a.date||'') < (b.date||'') ? -1 : 1; });
       if (!filtered.length) { container.innerHTML = '<div class="va-no-gh">لا توجد تقارير في هذا الشهر</div>'; return; }
-      var html = '<div class="va-day-list">' + filtered.map(function(r) {
+      container.innerHTML = '<div class="va-day-list">' + filtered.map(function(r) {
         return '<button class="va-day-btn" data-va-date="' + escapeHtml(r.date||r.id) + '">📄 ' + escapeHtml(r.date_text || arDate(r.date||r.id)) + '</button>';
       }).join('') + '</div>';
-      container.innerHTML = html;
       container.querySelectorAll('.va-day-btn').forEach(function(btn) {
-        btn.addEventListener('click', function() {
-          vaLoadAndShowReport(btn.dataset.vaDate);
-        });
+        btn.addEventListener('click', function() { vaLoadAndShowReport(btn.dataset.vaDate); });
       });
     }
 
     function vaLoadAndShowReport(date) {
       var fileKey = date.slice(0,4) === '2024' ? '2024' : (date.slice(0,4) + '-' + date.slice(5,7));
-      var source = vaCache[fileKey];
-      if (source) {
-        var r = source.filter(function(x) { return (x.date||x.id) === date; })[0];
+      var src = vaCache[fileKey];
+      if (src) {
+        var r = src.filter(function(x) { return (x.date||x.id) === date; })[0];
         if (r) { vaShowArchiveReport(r); return; }
       }
-      // Load the file if not cached
-      var base = vaBaseUrl();
-      fetch(base + fileKey + '.json').then(function(resp) { if (!resp.ok) throw new Error(resp.status); return resp.json(); })
+      vaSetContent('<div class="va-card"><div class="va-loading">⏳ جارٍ التحميل...</div></div>');
+      fetch(vaBaseUrl() + fileKey + '.json').then(function(resp) { if (!resp.ok) throw new Error(resp.status); return resp.json(); })
         .then(function(data) {
           vaCache[fileKey] = data;
           var r = data.filter(function(x) { return (x.date||x.id) === date; })[0];
-          if (r) vaShowArchiveReport(r);
-        }).catch(function() {
-          toast('⚠️ تعذّر تحميل التقرير');
-        });
+          if (r) vaShowArchiveReport(r); else vaRenderBrowse();
+        }).catch(function() { toast('⚠️ تعذّر تحميل التقرير'); vaRenderBrowse(); });
     }
 
     function vaShowArchiveReport(r) {
-      // Build a minimal report from sections data
       var html = '<div class="report-header"><h1 class="report-title">تقرير الرصد اليومي</h1><div class="report-date">' + escapeHtml(r.date_text || arDate(r.date)) + '</div></div>';
       (r.sections || []).forEach(function(s) {
         if (!s.content && !s.heading) return;
@@ -1336,24 +1333,28 @@
         });
         html += '</div></section>';
       }
-      html += '<div style="margin-top:18px"><button type="button" class="va-back-btn" id="va-back-from-report">← العودة للأرشيف</button></div>';
-      vaPanel.innerHTML = '<div class="va-card">' + html + '</div>';
-      document.getElementById('va-back-from-report').addEventListener('click', function() {
-        vaRenderBrowse();
-      });
-      vaPanel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      html += '<div style="margin-top:18px;display:flex;gap:12px;flex-wrap:wrap">';
+      html += '<button type="button" class="va-back-btn" id="va-back-arch">← العودة للأرشيف</button>';
+      html += '<button type="button" class="va-back-btn" id="va-back-rpt">🏠 رجوع للتقرير</button>';
+      html += '</div>';
+      vaSetContent(html);
+      observeSections();
+      document.getElementById('va-back-arch').addEventListener('click', vaRenderBrowse);
+      document.getElementById('va-back-rpt').addEventListener('click', vaBackToReport);
     }
 
     // ---- SEARCH MODE ----
     function vaRenderSearch() {
       var html = '<div class="va-card">';
-      html += '<button type="button" class="va-back-btn" id="va-close-srch">✕ إغلاق</button>';
-      html += '<h3>🔍 بحث في أرشيف الرصد</h3>';
+      html += '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:10px">';
+      html += '<h3 style="margin:0">🔍 بحث في أرشيف الرصد</h3>';
+      html += '<button type="button" class="va-back-btn" id="va-to-report-srch">← رجوع للتقرير</button>';
+      html += '</div>';
       html += '<div class="va-search-wrap"><input type="search" id="va-search-input" class="va-search-input" placeholder="ابحث في 500+ تقرير..." dir="rtl" /><button type="button" class="va-search-btn" id="va-search-go">بحث</button></div>';
       html += '<div id="va-search-results"></div>';
       html += '</div>';
-      vaPanel.innerHTML = html;
-      document.getElementById('va-close-srch').addEventListener('click', vaClose);
+      vaSetContent(html);
+      document.getElementById('va-to-report-srch').addEventListener('click', vaBackToReport);
       var inp = document.getElementById('va-search-input');
       document.getElementById('va-search-go').addEventListener('click', function() { vaRunSearch(inp.value.trim()); });
       inp.addEventListener('keydown', function(e) { if (e.key === 'Enter') vaRunSearch(inp.value.trim()); });
@@ -1364,15 +1365,13 @@
       if (!query || query.length < 2) { document.getElementById('va-search-results').innerHTML = '<div class="va-no-results">أدخل كلمة بحث (حرفان على الأقل)</div>'; return; }
       var resultsDiv = document.getElementById('va-search-results');
       var base = vaBaseUrl();
-      // Collect all file keys from index
       var fileKeys = {};
       vaIndex.forEach(function(e) {
         var y = String(e.year || (e.date||'').slice(0,4));
         var m = (e.date||'').slice(5,7);
         var key = y === '2024' ? '2024' : (y + '-' + m);
-        if (key && key !== '2024-00' && m !== '00') fileKeys[key] = true;
+        if (key && m !== '00') fileKeys[key] = true;
       });
-      // Add 2024 as single key
       fileKeys['2024'] = true;
       var keys = Object.keys(fileKeys).filter(function(k) { return k && k.length > 2; });
       resultsDiv.innerHTML = '<div class="va-progress">⏳ جارٍ البحث في ' + toAr(keys.length) + ' ملف...</div>';
@@ -1381,19 +1380,18 @@
       var q = query.toLowerCase();
       function checkDone() {
         loaded++;
+        var progEl = resultsDiv.querySelector('.va-progress');
         if (loaded < keys.length) {
-          resultsDiv.querySelector('.va-progress').textContent = '⏳ جارٍ البحث... ' + toAr(loaded) + '/' + toAr(keys.length);
+          if (progEl) progEl.textContent = '⏳ جارٍ البحث... ' + toAr(loaded) + '/' + toAr(keys.length);
           return;
         }
         allResults.sort(function(a,b) { return (b.date||'') > (a.date||'') ? 1 : -1; });
-        if (!allResults.length) { resultsDiv.innerHTML = '<div class="va-no-results">🔍 لا توجد نتائج للبحث عن «' + escapeHtml(query) + '»</div>'; return; }
+        if (!allResults.length) { resultsDiv.innerHTML = '<div class="va-no-results">🔍 لا توجد نتائج عن «' + escapeHtml(query) + '»</div>'; return; }
         var html = '<div style="margin-bottom:10px;font-size:0.9rem;color:var(--ink-2)">تم العثور على ' + toAr(allResults.length) + ' نتيجة</div>';
         allResults.forEach(function(item) {
-          var snip = item.snippet.replace(new RegExp('(' + query.replace(/[.*+?^${}()|[\]\\]/g,'\\$&') + ')', 'gi'), '<mark>$1</mark>');
-          html += '<div class="va-result-item" data-va-date="' + escapeHtml(item.date) + '">';
-          html += '<div class="va-result-date">📄 ' + escapeHtml(item.date_text || arDate(item.date)) + '</div>';
-          html += '<div class="va-result-snippet">' + snip + '</div>';
-          html += '</div>';
+          var esc = query.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
+          var snip = item.snippet.replace(new RegExp('(' + esc + ')', 'gi'), '<mark>$1</mark>');
+          html += '<div class="va-result-item" data-va-date="' + escapeHtml(item.date) + '"><div class="va-result-date">📄 ' + escapeHtml(item.date_text || arDate(item.date)) + '</div><div class="va-result-snippet">' + snip + '</div></div>';
         });
         resultsDiv.innerHTML = html;
         resultsDiv.querySelectorAll('.va-result-item').forEach(function(el) {
@@ -1405,11 +1403,11 @@
           vaCache[key].forEach(function(r) { vaSearchReport(r, q, query, allResults); });
           checkDone(); return;
         }
-        fetch(base + key + '.json').then(function(resp) { if (!resp.ok) throw new Error(); return resp.json(); })
-          .then(function(data) {
-            vaCache[key] = data;
-            data.forEach(function(r) { vaSearchReport(r, q, query, allResults); });
-          }).catch(function() {}).then(checkDone);
+        fetch(base + key + '.json')
+          .then(function(resp) { if (!resp.ok) throw new Error(); return resp.json(); })
+          .then(function(data) { vaCache[key] = data; data.forEach(function(r) { vaSearchReport(r, q, query, allResults); }); })
+          .catch(function() {})
+          .then(checkDone);
       });
     }
 
@@ -1419,23 +1417,22 @@
       if (idx === -1) return;
       var start = Math.max(0, idx - 60);
       var end = Math.min(fullText.length, idx + rawQ.length + 100);
-      var snippet = (start > 0 ? '...' : '') + fullText.slice(start, end) + (end < fullText.length ? '...' : '');
-      results.push({ date: r.date || r.id, date_text: r.date_text, snippet: snippet });
+      results.push({ date: r.date||r.id, date_text: r.date_text, snippet: (start > 0 ? '...' : '') + fullText.slice(start, end) + (end < fullText.length ? '...' : '') });
     }
 
-    // ---- Event handler in voContent ----
-    // Report action buttons (viewer-only mode)
+    // ---- Report action buttons click handler ----
     voContent.addEventListener('click', function(e) {
       var btn = e.target.closest('[data-action]');
       if (!btn) return;
-      if (btn.dataset.action === 'copy-link') {
+      var action = btn.dataset.action;
+      if (action === 'copy-link') {
         copyText(window.location.href).then(function() { toast('🔗 تم نسخ الرابط'); });
-      } else if (btn.dataset.action === 'copy-text') {
+      } else if (action === 'copy-text') {
         copyReportText(voContent);
-      } else if (btn.dataset.action === 'open-archive') {
-        if (vaPanel.style.display !== 'none' && vaMode === 'browse') { vaClose(); } else { vaOpen('browse'); }
-      } else if (btn.dataset.action === 'open-search') {
-        if (vaPanel.style.display !== 'none' && vaMode === 'search') { vaClose(); } else { vaOpen('search'); }
+      } else if (action === 'open-archive') {
+        vaOpen('browse');
+      } else if (action === 'open-search') {
+        vaOpen('search');
       }
     });
 
