@@ -108,7 +108,10 @@
   .item-row { display: flex; gap: 8px; margin-bottom: 10px; align-items: flex-start; }
   .item-row textarea { flex: 1; }
   .link-row { display: grid; grid-template-columns: 1fr 1.4fr auto; gap: 8px; margin-bottom: 10px; }
-  @media (max-width: 600px) { .link-row { grid-template-columns: 1fr; } }
+  .link-row.with-narrative { grid-template-columns: 1.2fr 1.4fr 0.9fr auto; }
+  .narrative-input { padding: 10px 12px; background: var(--card-2); border: 1px solid var(--line-strong); border-right: 3px solid var(--orange); border-radius: 10px; color: var(--ink); font-family: inherit; font-size: 0.9rem; }
+  .narrative-input::placeholder { color: var(--muted); font-size: 0.82rem; }
+  @media (max-width: 600px) { .link-row { grid-template-columns: 1fr; } .link-row.with-narrative { grid-template-columns: 1fr; } }
 
   /* ========== BUTTONS ========== */
   button { cursor: pointer; font-family: inherit; border: none; border-radius: 10px; padding: 10px 16px; font-size: 0.95rem; transition: all 0.15s; }
@@ -272,6 +275,50 @@
   .status-box.err { background: var(--danger-soft); border-color: rgba(185,28,28,0.30); color: var(--danger); }
 
   footer.app-footer { text-align: center; color: var(--muted); padding: 24px 16px; font-size: 0.85rem; border-top: 1px solid var(--line); margin-top: 40px; }
+
+  /* ========== NARRATIVE CHART ========== */
+  .narrative-chart { padding: 6px 0; }
+  .nc-total { font-size: 0.88rem; color: var(--muted); margin-bottom: 14px; padding-bottom: 10px; border-bottom: 1px solid var(--line); }
+  .nc-total strong { color: var(--orange); font-size: 1rem; }
+  .nc-row { margin-bottom: 14px; }
+  .nc-label { font-weight: 700; color: var(--ink); font-size: 0.93rem; margin-bottom: 6px; line-height: 1.5; }
+  .nc-bar-wrap { display: flex; align-items: center; gap: 10px; }
+  .nc-bar { height: 22px; background: linear-gradient(90deg, var(--orange), #EA580C); border-radius: 6px; min-width: 6px; transition: width 0.5s ease; flex-shrink: 0; }
+  .nc-count { font-size: 0.82rem; color: var(--muted); white-space: nowrap; }
+  .nc-untagged { font-size: 0.82rem; color: var(--muted); margin-top: 10px; padding-top: 10px; border-top: 1px dashed var(--line); }
+
+  /* ========== HISTORICAL ARCHIVE ========== */
+  .hist-section { margin-top: 24px; }
+  .hist-search-wrap { display: flex; gap: 8px; margin-bottom: 14px; }
+  .hist-search-wrap input { flex: 1; padding: 11px 14px; background: var(--card-2); border: 1px solid var(--line-strong); border-radius: 10px; color: var(--ink); font-family: inherit; font-size: 1rem; }
+  .hist-search-wrap input:focus { outline: none; border-color: var(--orange); }
+  .hist-search-wrap button { padding: 11px 18px; background: var(--orange); color: #fff; border: none; border-radius: 10px; font-weight: 700; cursor: pointer; font-family: inherit; }
+  .hist-year-tabs { display: flex; gap: 8px; margin-bottom: 14px; flex-wrap: wrap; }
+  .hist-year-btn { padding: 8px 20px; background: var(--card-2); border: 1px solid var(--line-strong); border-radius: 999px; color: var(--ink-soft); font-family: inherit; font-size: 0.95rem; font-weight: 700; cursor: pointer; }
+  .hist-year-btn.active { background: var(--orange); color: #fff; border-color: var(--orange); }
+  .hist-months { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 14px; min-height: 0; }
+  .hist-month-btn { padding: 5px 14px; background: var(--card-2); border: 1px solid var(--line); border-radius: 999px; color: var(--ink-soft); font-size: 0.85rem; font-family: inherit; cursor: pointer; transition: all 0.15s; }
+  .hist-month-btn.active { background: var(--orange-soft); color: var(--orange); border-color: var(--orange); font-weight: 700; }
+  .hist-month-btn:hover { background: var(--orange-soft); color: var(--orange); }
+  .hist-report-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; margin-top: 4px; }
+  .hist-report-card { background: var(--card-2); border: 1px solid var(--line); border-radius: 10px; padding: 14px 10px; cursor: pointer; text-align: center; transition: all 0.18s; }
+  .hist-report-card:hover { background: var(--orange-soft); border-color: var(--orange); transform: translateY(-2px); }
+  .hist-report-card .hrc-day { font-size: 1.45rem; font-weight: 900; color: var(--orange); line-height: 1; }
+  .hist-report-card .hrc-month { font-size: 0.8rem; color: var(--muted); margin-top: 4px; }
+  .hist-report-card .hrc-links { font-size: 0.78rem; color: var(--ink-soft); margin-top: 6px; }
+  .hist-loading { text-align: center; padding: 30px; color: var(--muted); font-size: 1rem; }
+  .hist-modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.55); z-index: 9000; display: flex; align-items: flex-start; justify-content: center; padding: 20px; overflow-y: auto; }
+  .hist-modal-box { background: var(--bg); border-radius: 16px; width: 100%; max-width: 720px; max-height: 90vh; overflow-y: auto; padding: 24px; position: relative; margin: auto; }
+  .hist-modal-close { position: absolute; top: 14px; left: 14px; background: var(--card-2); border: none; border-radius: 50%; width: 34px; height: 34px; font-size: 1.1rem; cursor: pointer; color: var(--ink); }
+  .hist-modal-title { font-size: 1.2rem; font-weight: 900; color: var(--orange); margin: 0 0 4px; padding-left: 40px; }
+  .hist-modal-date { color: var(--muted); font-size: 0.9rem; margin-bottom: 16px; padding-left: 40px; }
+  .hist-section-block { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 14px; margin-bottom: 12px; }
+  .hist-section-heading { font-weight: 800; color: var(--orange); margin-bottom: 8px; font-size: 0.95rem; }
+  .hist-section-content { color: var(--ink); font-size: 0.92rem; white-space: pre-line; line-height: 1.9; }
+  .hist-links-block { margin-top: 12px; }
+  .hist-link-item { display: block; color: var(--orange); font-size: 0.82rem; direction: ltr; text-align: left; padding: 3px 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .hist-no-gh { background: var(--card-2); border: 1px dashed var(--line-strong); border-radius: 10px; padding: 24px; text-align: center; color: var(--muted); margin-top: 8px; }
+  .hist-search-result-header { font-weight: 700; color: var(--ink-soft); font-size: 0.9rem; margin-bottom: 10px; }
 </style>
 </head>
 <body>
@@ -307,6 +354,9 @@
 <!-- ========== TOAST ========== -->
 <div id="toast" class="toast"></div>
 
+<!-- DATALIST for narrative suggestions -->
+<datalist id="narrative-datalist"></datalist>
+
 <!-- ========== ADMIN MAIN ========== -->
 <main id="admin-main">
 
@@ -339,14 +389,14 @@
 
     <div class="card">
       <h2><span class="ico ico-x" id="h-ico-3"></span>تغريدات استدلالية</h2>
-      <p class="hint">العنوان (نص التغريدة أو شرحها) والرابط.</p>
+      <p class="hint">العنوان (نص التغريدة أو شرحها)، الرابط، <strong>والسردية المرتبطة</strong> (لظهورها في الرسم البياني).</p>
       <div id="hostile_list"></div>
       <button type="button" class="btn-add" data-add="hostile">+ إضافة تغريدة</button>
     </div>
 
     <div class="card">
       <h2><span class="ico ico-fb" id="h-ico-4"></span>منشورات استدلالية من مجموعات الفيسبوك المحلية</h2>
-      <p class="hint">في حال لم يظهر لك المنشور عند الضغط عليه فقد تكون المجموعة مغلقة وتتطلب الإشتراك.</p>
+      <p class="hint">في حال لم يظهر لك المنشور عند الضغط عليه فقد تكون المجموعة مغلقة وتتطلب الإشتراك. أضف <strong>السردية المرتبطة</strong> لتظهر في الرسم البياني.</p>
       <div id="suggestive_fb_list"></div>
       <button type="button" class="btn-add" data-add="suggestive_fb">+ إضافة منشور</button>
     </div>
@@ -385,6 +435,25 @@
       <input type="file" id="import-file" accept="application/json" style="display:none">
     </div>
     <div id="archive-content"></div>
+
+    <!-- HISTORICAL ARCHIVE SECTION -->
+    <div class="hist-section card" style="margin-top:20px">
+      <h2><span class="ico ico-orange">📚</span> الأرشيف التاريخي (2024–2026)</h2>
+      <p class="hint">استعراض أو البحث في 478 تقرير مؤرشف من الملفات الأصلية — يتطلب ضبط إعدادات GitHub</p>
+      <div id="hist-archive-body">
+        <div class="hist-no-gh">⚙️ يرجى ضبط إعدادات GitHub (المالك + المستودع) لتفعيل الأرشيف التاريخي</div>
+      </div>
+    </div>
+
+    <!-- REPORT MODAL (reused for historical reports) -->
+    <div id="hist-modal-overlay" class="hist-modal-overlay" style="display:none">
+      <div class="hist-modal-box">
+        <button class="hist-modal-close" id="hist-modal-close-btn">✕</button>
+        <div class="hist-modal-title" id="hist-modal-title"></div>
+        <div class="hist-modal-date" id="hist-modal-date"></div>
+        <div id="hist-modal-content"></div>
+      </div>
+    </div>
   </section>
 
   <!-- SETTINGS TAB -->
@@ -966,6 +1035,39 @@
     }).join('');
     return '<section class="section"><h2><span class="ico ' + iconCls + '">' + iconHtml + '</span>' + escapeHtml(title) + '</h2>' + noteHtml + '<div class="platform-list">' + cards + '</div></section>';
   }
+  function renderNarrativeChart(r) {
+    var all = (r.hostile_tweets || []).concat(r.suggestive_fb_posts || []);
+    if (!all.length) return '';
+    var labeled = all.filter(function(x) { return x.narrative && x.narrative.trim(); });
+    if (!labeled.length) return '';
+    var groups = {};
+    labeled.forEach(function(x) { var n = x.narrative.trim(); groups[n] = (groups[n] || 0) + 1; });
+    var total = labeled.length;
+    var entries = Object.keys(groups).map(function(k) { return { label: k, count: groups[k] }; });
+    entries.sort(function(a, b) { return b.count - a.count; });
+    var maxCount = entries[0].count;
+    var bars = entries.map(function(e) {
+      var pct = Math.round(e.count / total * 100);
+      var barW = Math.round(e.count / maxCount * 100);
+      return '<div class="nc-row">' +
+        '<div class="nc-label">' + escapeHtml(e.label) + '</div>' +
+        '<div class="nc-bar-wrap">' +
+          '<div class="nc-bar" style="width:' + barW + '%"></div>' +
+          '<span class="nc-count">' + toAr(e.count) + ' رابط &nbsp;·&nbsp; ' + toAr(pct) + '%</span>' +
+        '</div>' +
+      '</div>';
+    }).join('');
+    var untagged = all.length - labeled.length;
+    var untaggedHtml = untagged > 0 ? '<div class="nc-untagged">⚪ ' + toAr(untagged) + ' رابط بدون تصنيف</div>' : '';
+    return '<section class="section">' +
+      '<h2><span class="ico ico-orange">📊</span>توزيع الروابط الاستدلالية حسب السردية</h2>' +
+      '<div class="narrative-chart">' +
+        '<div class="nc-total">إجمالي الروابط المُصنَّفة: <strong>' + toAr(labeled.length) + ' من ' + toAr(all.length) + '</strong></div>' +
+        bars + untaggedHtml +
+      '</div>' +
+    '</section>';
+  }
+
   function renderCounterCampaign(text) {
     if (!text) return '';
     return '<section class="section"><h2><span class="ico ico-warn">🔍</span>مؤشرات على حملة مضادة من الخصوم</h2><div class="counter-campaign-section" style="padding:14px 18px;background:var(--card-2);border-right:3px solid var(--orange);border-radius:6px;color:var(--ink);white-space:pre-wrap;word-wrap:break-word;text-align:justify;line-height:1.9">' + escapeHtml(text) + '</div></section>';
@@ -977,6 +1079,7 @@
       + renderIncitementSection(r.incitement_posts || [])
       + renderPlatformSection('x', 'تغريدات استدلالية', r.hostile_tweets || [])
       + renderPlatformSection('fb', 'منشورات استدلالية من مجموعات الفيسبوك المحلية', r.suggestive_fb_posts || [], 'في حال لم يظهر لك المنشور عند الضغط عليه فقد تكون المجموعة مغلقة وتتطلب الاشتراك')
+      + renderNarrativeChart(r)
       + renderCounterCampaign(r.counter_campaign || '')
       + '<div class="report-footer">تقرير الرصد اليومي - قسم المعلومات</div>'
       + '<div class="report-actions"><button type="button" class="ra-copy" data-action="copy-link">🔗 نسخ رابط التقرير</button><button type="button" class="ra-pdf" data-action="copy-text">📋 نسخ نص التقرير</button></div>';
@@ -1178,7 +1281,7 @@
     document.querySelectorAll('.tab-btn').forEach(function(b) { b.classList.toggle('active', b.dataset.tab === name); });
     document.querySelectorAll('.tab-panel').forEach(function(p) { p.classList.toggle('active', p.id === 'tab-' + name); });
     if (name === 'viewer') { renderViewer(); updateShareBanner(); }
-    if (name === 'archive') renderArchive();
+    if (name === 'archive') { renderArchive(); initHistArchive(); }
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
   document.querySelectorAll('.tab-btn').forEach(function(b) { b.addEventListener('click', function() { switchTab(b.dataset.tab); }); });
@@ -1194,11 +1297,17 @@
     row.querySelector('.btn-remove').addEventListener('click', function() { row.remove(); });
     return row;
   }
-  function makeLinkRow(item) {
-    var row = document.createElement('div'); row.className = 'link-row';
-    row.innerHTML = '<input type="text" placeholder="العنوان / نص التوضيح"><input type="url" placeholder="https://..."><button type="button" class="btn-remove">حذف</button>';
+  function makeLinkRow(item, withNarrative) {
+    var row = document.createElement('div');
+    row.className = 'link-row' + (withNarrative ? ' with-narrative' : '');
+    var narrHtml = withNarrative
+      ? '<input type="text" class="narrative-input" placeholder="السردية المرتبطة..." list="narrative-datalist">'
+      : '';
+    row.innerHTML = '<input type="text" placeholder="العنوان / نص التوضيح"><input type="url" placeholder="https://...">' + narrHtml + '<button type="button" class="btn-remove">حذف</button>';
     var inputs = row.querySelectorAll('input');
-    inputs[0].value = (item && item.title) || ''; inputs[1].value = (item && item.url) || '';
+    inputs[0].value = (item && item.title) || '';
+    inputs[1].value = (item && item.url) || '';
+    if (withNarrative && inputs[2]) inputs[2].value = (item && item.narrative) || '';
     row.querySelector('.btn-remove').addEventListener('click', function() { row.remove(); });
     return row;
   }
@@ -1206,11 +1315,24 @@
   var lists = {
     twitter:       { container: document.getElementById('twitter_list'),       type: 'text' },
     facebook:      { container: document.getElementById('facebook_list'),      type: 'text' },
-    incitement:    { container: document.getElementById('incitement_list'),    type: 'link' },
-    hostile:       { container: document.getElementById('hostile_list'),       type: 'link' },
-    suggestive_fb: { container: document.getElementById('suggestive_fb_list'), type: 'link' }
+    incitement:    { container: document.getElementById('incitement_list'),    type: 'link', withNarrative: false },
+    hostile:       { container: document.getElementById('hostile_list'),       type: 'link', withNarrative: true },
+    suggestive_fb: { container: document.getElementById('suggestive_fb_list'), type: 'link', withNarrative: true }
   };
-  function addRow(key, value) { lists[key].container.appendChild(lists[key].type === 'text' ? makeTextRow(value) : makeLinkRow(value)); }
+  function addRow(key, value) { lists[key].container.appendChild(lists[key].type === 'text' ? makeTextRow(value) : makeLinkRow(value, lists[key].withNarrative)); }
+
+  // تحديث datalist السرديات من حقول twitter_narratives
+  function updateNarrativeDatalist() {
+    var dl = document.getElementById('narrative-datalist');
+    if (!dl) return;
+    var opts = new Set();
+    lists.twitter.container.querySelectorAll('textarea').forEach(function(t) {
+      var v = t.value.trim();
+      if (v) { var short = v.length > 60 ? v.slice(0, 60) + '...' : v; opts.add(short); }
+    });
+    dl.innerHTML = Array.from(opts).map(function(o) { return '<option value="' + escapeHtml(o) + '">'; }).join('');
+  }
+  document.getElementById('twitter_list').addEventListener('input', updateNarrativeDatalist);
   function clearList(key) { lists[key].container.innerHTML = ''; }
 
   function collectForm() {
@@ -1221,8 +1343,14 @@
       var targetKey = key === 'suggestive_fb' ? 'suggestive_fb_posts' : (key === 'hostile' ? 'hostile_tweets' : 'incitement_posts');
       lists[key].container.querySelectorAll('.link-row').forEach(function(row) {
         var inputs = row.querySelectorAll('input');
-        var title = inputs[0].value.trim(), url = inputs[1].value.trim();
-        if (title || url) out[targetKey].push({ title: title, url: url });
+        var title = inputs[0] ? inputs[0].value.trim() : '';
+        var url   = inputs[1] ? inputs[1].value.trim() : '';
+        var narrative = inputs[2] ? inputs[2].value.trim() : '';
+        if (title || url) {
+          var item = { title: title, url: url };
+          if (narrative) item.narrative = narrative;
+          out[targetKey].push(item);
+        }
       });
     });
     out.counter_campaign = document.getElementById('counter_campaign').value.trim();
@@ -1238,6 +1366,7 @@
       (r.incitement_posts    || []).forEach(function(v) { addRow('incitement', v); });
       (r.hostile_tweets      || []).forEach(function(v) { addRow('hostile', v); });
       (r.suggestive_fb_posts || []).forEach(function(v) { addRow('suggestive_fb', v); });
+      updateNarrativeDatalist();
       document.getElementById('counter_campaign').value = r.counter_campaign || '';
     }
     Object.keys(lists).forEach(function(k) { if (!lists[k].container.children.length) addRow(k); });
@@ -1458,6 +1587,236 @@
       });
     });
   }
+
+  // ============ HISTORICAL ARCHIVE ============
+  var histCache = {};        // { 'YYYY-MM': [...reports] }
+  var histIndex = null;      // master index array
+  var histActiveYear = '2026';
+  var histActiveMonth = null;
+
+  var AR_MONTH_NAMES_FULL = ['يناير','فبراير','مارس','أبريل','مايو','يونيو','يوليو','أغسطس','سبتمبر','أكتوبر','نوفمبر','ديسمبر'];
+
+  function histBaseUrl() {
+    var s = loadSettings();
+    if (!s.gh_owner || !s.gh_repo) return null;
+    return 'https://raw.githubusercontent.com/' + encodeURIComponent(s.gh_owner) + '/' + encodeURIComponent(s.gh_repo) + '/main/reports-archive/';
+  }
+
+  function initHistArchive() {
+    var body = document.getElementById('hist-archive-body');
+    var base = histBaseUrl();
+    if (!base) {
+      body.innerHTML = '<div class="hist-no-gh">⚙️ يرجى ضبط إعدادات GitHub (المالك + المستودع) في تبويب الإعدادات لتفعيل الأرشيف التاريخي</div>';
+      return;
+    }
+    if (histIndex) { renderHistUI(body); return; }
+    body.innerHTML = '<div class="hist-loading">⏳ جارٍ تحميل فهرس الأرشيف...</div>';
+    fetch(base + 'index.json').then(function(r) {
+      if (!r.ok) throw new Error(r.status);
+      return r.json();
+    }).then(function(data) {
+      histIndex = data;
+      renderHistUI(body);
+    }).catch(function(e) {
+      body.innerHTML = '<div class="hist-no-gh">⚠️ تعذّر تحميل فهرس الأرشيف — تأكد من رفع ملفات <code>reports-archive/</code> إلى GitHub<br><small style="opacity:0.7">' + e.message + '</small></div>';
+    });
+  }
+
+  function renderHistUI(body) {
+    body.innerHTML =
+      '<div class="hist-search-wrap">' +
+        '<input type="search" id="hist-search-input" placeholder="🔍 ابحث في الأرشيف..." dir="rtl">' +
+        '<button type="button" id="hist-search-go">بحث</button>' +
+      '</div>' +
+      '<div class="hist-year-tabs" id="hist-year-tabs">' +
+        ['2026','2025','2024'].map(function(y) {
+          return '<button class="hist-year-btn' + (y === histActiveYear ? ' active' : '') + '" data-year="' + y + '">' + y + '</button>';
+        }).join('') +
+      '</div>' +
+      '<div id="hist-months-row" class="hist-months"></div>' +
+      '<div id="hist-results-area"></div>';
+
+    document.getElementById('hist-year-tabs').addEventListener('click', function(e) {
+      var btn = e.target.closest('.hist-year-btn');
+      if (!btn) return;
+      document.querySelectorAll('.hist-year-btn').forEach(function(b) { b.classList.remove('active'); });
+      btn.classList.add('active');
+      histActiveYear = btn.dataset.year;
+      histActiveMonth = null;
+      renderHistMonths(histActiveYear);
+      document.getElementById('hist-results-area').innerHTML = '';
+    });
+    document.getElementById('hist-search-go').addEventListener('click', function() {
+      var q = (document.getElementById('hist-search-input').value || '').trim();
+      if (q.length < 2) { toast('أدخل كلمة بحث (حرفان على الأقل)', true); return; }
+      runHistSearch(q);
+    });
+    document.getElementById('hist-search-input').addEventListener('keydown', function(e) {
+      if (e.key === 'Enter') document.getElementById('hist-search-go').click();
+    });
+
+    renderHistMonths(histActiveYear);
+  }
+
+  function renderHistMonths(year) {
+    var row = document.getElementById('hist-months-row');
+    if (!row) return;
+    var months = [];
+    if (histIndex) {
+      var seen = {};
+      histIndex.forEach(function(r) {
+        if (r.year == year && r.date) {
+          var m = r.date.slice(5, 7);
+          if (!seen[m]) { seen[m] = true; months.push(m); }
+        }
+      });
+    }
+    if (!months.length) { row.innerHTML = ''; return; }
+    months.sort();
+    row.innerHTML = months.map(function(m) {
+      var label = AR_MONTH_NAMES_FULL[parseInt(m, 10) - 1] || m;
+      var isActive = histActiveMonth === m;
+      return '<button class="hist-month-btn' + (isActive ? ' active' : '') + '" data-month="' + m + '">' + label + '</button>';
+    }).join('');
+    row.querySelectorAll('.hist-month-btn').forEach(function(btn) {
+      btn.addEventListener('click', function() {
+        row.querySelectorAll('.hist-month-btn').forEach(function(b) { b.classList.remove('active'); });
+        btn.classList.add('active');
+        histActiveMonth = btn.dataset.month;
+        loadAndShowMonth(histActiveYear, histActiveMonth);
+      });
+    });
+    // Auto-load first month
+    if (months.length && !histActiveMonth) {
+      var firstBtn = row.querySelector('.hist-month-btn');
+      if (firstBtn) { firstBtn.classList.add('active'); histActiveMonth = months[0]; loadAndShowMonth(year, months[0]); }
+    }
+  }
+
+  function loadAndShowMonth(year, month) {
+    var key = year + '-' + month;
+    var results = document.getElementById('hist-results-area');
+    if (!results) return;
+    if (histCache[key]) { renderHistList(histCache[key], results); return; }
+    results.innerHTML = '<div class="hist-loading">⏳ جارٍ التحميل...</div>';
+    var base = histBaseUrl();
+    fetch(base + key + '.json').then(function(r) {
+      if (!r.ok) throw new Error(r.status);
+      return r.json();
+    }).then(function(data) {
+      histCache[key] = data;
+      renderHistList(data, results);
+    }).catch(function(e) {
+      results.innerHTML = '<div class="hist-no-gh">⚠️ تعذّر تحميل بيانات ' + key + '</div>';
+    });
+  }
+
+  function renderHistList(reports, container) {
+    if (!reports || !reports.length) {
+      container.innerHTML = '<div class="hist-no-gh">لا توجد تقارير في هذا الشهر</div>';
+      return;
+    }
+    var sorted = reports.slice().sort(function(a, b) { return (a.date || a.id) < (b.date || b.id) ? -1 : 1; });
+    container.innerHTML = '<div class="hist-report-list">' +
+      sorted.map(function(r, i) {
+        var day = r.date ? parseInt(r.date.slice(8), 10) : '?';
+        var monthLabel = r.date ? (AR_MONTH_NAMES_FULL[parseInt(r.date.slice(5, 7), 10) - 1] || '') : '';
+        var linksCount = (r.links || []).length;
+        return '<div class="hist-report-card" data-idx="' + i + '">' +
+          '<div class="hrc-day">' + day + '</div>' +
+          '<div class="hrc-month">' + escapeHtml(monthLabel) + '</div>' +
+          (linksCount ? '<div class="hrc-links">🔗 ' + linksCount + ' رابط</div>' : '') +
+          '</div>';
+      }).join('') +
+    '</div>';
+    container.querySelectorAll('.hist-report-card').forEach(function(card) {
+      card.addEventListener('click', function() { openHistReport(sorted[parseInt(card.dataset.idx, 10)]); });
+    });
+  }
+
+  function runHistSearch(query) {
+    var results = document.getElementById('hist-results-area');
+    if (!results) return;
+    var lowerQ = query;
+    var years = ['2026','2025','2024'];
+    var base = histBaseUrl();
+    var needed = [];
+    if (histIndex) {
+      var seen = {};
+      histIndex.forEach(function(r) {
+        if (r.date) { var k = r.date.slice(0,7); if (!seen[k]) { seen[k]=true; needed.push(k); } }
+      });
+    }
+    results.innerHTML = '<div class="hist-loading">⏳ جارٍ البحث في الأرشيف...</div>';
+    // Load all uncached month files then search
+    var toLoad = needed.filter(function(k) { return !histCache[k]; });
+    var promises = toLoad.map(function(k) {
+      return fetch(base + k + '.json').then(function(r) { return r.ok ? r.json() : []; }).then(function(d) { histCache[k] = d; }).catch(function() { histCache[k] = []; });
+    });
+    Promise.all(promises).then(function() {
+      var hits = [];
+      needed.forEach(function(k) {
+        (histCache[k] || []).forEach(function(r) {
+          var text = (r.sections || []).map(function(s) { return s.heading + ' ' + s.content; }).join(' ');
+          if (text.indexOf(lowerQ) !== -1) hits.push(r);
+        });
+      });
+      if (!hits.length) {
+        results.innerHTML = '<div class="hist-no-gh">لا توجد نتائج لـ «' + escapeHtml(query) + '»</div>';
+        return;
+      }
+      hits.sort(function(a, b) { return (a.date || a.id) > (b.date || b.id) ? -1 : 1; });
+      results.innerHTML = '<div class="hist-search-result-header">وُجد ' + hits.length + ' تقرير يحتوي على «' + escapeHtml(query) + '»</div>';
+      var listDiv = document.createElement('div');
+      listDiv.className = 'hist-report-list';
+      hits.slice(0, 60).forEach(function(r) {
+        var day = r.date ? parseInt(r.date.slice(8), 10) : '?';
+        var monthLabel = r.date ? (AR_MONTH_NAMES_FULL[parseInt(r.date.slice(5,7),10)-1] || '') : '';
+        var card = document.createElement('div');
+        card.className = 'hist-report-card';
+        card.innerHTML = '<div class="hrc-day">' + day + '</div><div class="hrc-month">' + escapeHtml(monthLabel + ' ' + (r.year||'')) + '</div>';
+        card.addEventListener('click', function() { openHistReport(r); });
+        listDiv.appendChild(card);
+      });
+      results.appendChild(listDiv);
+    });
+  }
+
+  function openHistReport(report) {
+    var overlay = document.getElementById('hist-modal-overlay');
+    var titleEl = document.getElementById('hist-modal-title');
+    var dateEl = document.getElementById('hist-modal-date');
+    var contentEl = document.getElementById('hist-modal-content');
+    titleEl.textContent = 'تقرير الرصد اليومي';
+    dateEl.textContent = report.date_text || report.date || '';
+    var html = '';
+    (report.sections || []).forEach(function(s) {
+      if (!s.content || !s.content.trim()) return;
+      html += '<div class="hist-section-block">';
+      if (s.heading) html += '<div class="hist-section-heading">' + escapeHtml(s.heading) + '</div>';
+      html += '<div class="hist-section-content">' + escapeHtml(s.content) + '</div>';
+      html += '</div>';
+    });
+    if (report.links && report.links.length) {
+      html += '<div class="hist-links-block card" style="margin-top:8px">';
+      html += '<div class="hist-section-heading">🔗 الروابط</div>';
+      report.links.forEach(function(url) {
+        html += '<a class="hist-link-item" href="' + escapeHtml(url) + '" target="_blank" rel="noopener">' + escapeHtml(url) + '</a>';
+      });
+      html += '</div>';
+    }
+    contentEl.innerHTML = html;
+    overlay.style.display = 'flex';
+    document.body.style.overflow = 'hidden';
+  }
+
+  document.getElementById('hist-modal-close-btn').addEventListener('click', function() {
+    document.getElementById('hist-modal-overlay').style.display = 'none';
+    document.body.style.overflow = '';
+  });
+  document.getElementById('hist-modal-overlay').addEventListener('click', function(e) {
+    if (e.target === this) { this.style.display = 'none'; document.body.style.overflow = ''; }
+  });
 
   // ============ EXPORT / IMPORT ============
   document.getElementById('export-btn').addEventListener('click', function() {
